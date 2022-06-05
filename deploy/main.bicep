@@ -128,7 +128,11 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: cosmosDb.outputs.readContainerName
         }
         {
-          name: 'CosmosDbEndpoint'
+          name: 'leases'
+          value: cosmosDb.outputs.leaseContainerName
+        }
+        {
+          name: 'CosmosDbEndpoint__accountEndpoint'
           value: cosmosDb.outputs.cosmosDbEndpoint
         }
         {
