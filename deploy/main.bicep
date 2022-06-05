@@ -18,6 +18,7 @@ var cosmosDbAccountName = '${applicationName}db'
 var databaseName = 'ReadingsDb'
 var writeContainerName = 'Readings'
 var readContainerName = 'Locations'
+var leaseContainerName = 'leases'
 var containerThroughput = 4000
 var appInsightsName = '${applicationName}ai'
 var eventHubsName = '${applicationName}eh'
@@ -31,6 +32,7 @@ module cosmosDb 'modules/cosmosDb.bicep' = {
     readContainerName: readContainerName
     containerThroughput: containerThroughput
     cosmosDbAccountName: cosmosDbAccountName
+    leaseContainerName: leaseContainerName
     databaseName: databaseName
     location: location
   }

@@ -13,6 +13,9 @@ param writeContainerName string
 @description('The name of our read container')
 param readContainerName string
 
+@description('The name of our lease container')
+param leaseContainerName string
+
 @description('The amount of throughput to provision in our Cosmos DB Container')
 param containerThroughput int
 
@@ -105,8 +108,36 @@ resource readContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/conta
   }
 }
 
+resource leaseContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2021-11-15-preview' = {
+  name: leaseContainerName
+  parent: database
+  properties: {
+    options: {
+      throughput: containerThroughput
+    }
+    resource: {
+      id: leaseContainerName
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+      }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+      }
+    }
+  }
+}
+
 output cosmosDbAccountName string = cosmosDbAccount.name
 output databaseName string = database.name
 output writeContainerName string = writeContainer.name
 output readContainerName string = readContainer.name
+output leaseContainerName string = leaseContainer.name
 output cosmosDbEndpoint string = cosmosDbAccount.properties.documentEndpoint
