@@ -7,6 +7,13 @@ param applicationName string = uniqueString(resourceGroup().id)
 @description('The SKU for the storage account')
 param storageSku string = 'Standard_LRS'
 
+@description('The name of the Key Vault that we use to store secrets')
+param keyVaultName string
+
+@description('The connection string for Cosmos DB')
+@secure()
+param cosmosDbConnectionString string
+
 var appServicePlanName = '${applicationName}asp'
 var appServicePlanSkuName = 'EP1'
 var appServicePlanTierName = 'ElasticPremium'
@@ -35,6 +42,7 @@ module cosmosDb 'modules/cosmosDb.bicep' = {
     leaseContainerName: leaseContainerName
     databaseName: databaseName
     location: location
+    keyVaultName: keyVaultName
   }
 }
 
@@ -132,8 +140,8 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: cosmosDb.outputs.leaseContainerName
         }
         {
-          name: 'CosmosDbEndpoint__accountEndpoint'
-          value: cosmosDb.outputs.cosmosDbEndpoint
+          name: 'CosmosDbConnectionString'
+          value: cosmosDbConnectionString
         }
         {
           name: 'CosmosDbEndpoint'

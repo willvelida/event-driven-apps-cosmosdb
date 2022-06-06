@@ -28,7 +28,7 @@ namespace DeviceReader.Functions
 
         [FunctionName(nameof(MaterializeReadings))]
         public async Task Run([CosmosDBTrigger(
-            "ReadingsDb", "Locations", Connection = "CosmosDbEndpoint", LeaseContainerName = "leases")]IReadOnlyList<DeviceReading> input,
+            "ReadingsDb", "Locations", Connection = "CosmosDbConnectionString", LeaseContainerName = "leases")]IReadOnlyList<DeviceReading> input,
             ILogger log)
         {
             try

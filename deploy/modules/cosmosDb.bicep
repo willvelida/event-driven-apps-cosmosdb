@@ -19,6 +19,15 @@ param leaseContainerName string
 @description('The amount of throughput to provision in our Cosmos DB Container')
 param containerThroughput int
 
+@description('The name of the key vault to store secrets in')
+param keyVaultName string
+
+var connectionStringSecretName = 'CosmosDbConnectionString'
+
+resource keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' existing = {
+  name: keyVaultName
+}
+
 resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-11-15-preview' = {
   name: cosmosDbAccountName
   location: location
@@ -132,6 +141,14 @@ resource leaseContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/cont
         ]
       }
     }
+  }
+}
+
+resource connectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  name: connectionStringSecretName
+  parent: keyVault
+  properties: {
+    value: cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
   }
 }
 

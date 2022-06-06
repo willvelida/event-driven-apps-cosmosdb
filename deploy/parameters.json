@@ -1,0 +1,17 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "CosmosDbConnectionString": {
+        "reference": {
+          "keyVault": {
+            "id": "/subscriptions/7d597c54-0c06-43da-a03c-569e20ce43c0/resourceGroups/cosmosdblearn-rg/providers/Microsoft.KeyVault/vaults/wvcosmosdblearnkv"
+          },
+          "secretName": "CosmosDbConnectionString"
+        }
+      },
+      "keyVaultName": {
+        "value": "wvcosmosdblearnkv"
+      }
+    }
+  }
