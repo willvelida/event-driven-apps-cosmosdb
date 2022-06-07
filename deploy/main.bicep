@@ -113,6 +113,9 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
       name: keyVaultSku
     }
     tenantId: subscription().tenantId
+    accessPolicies: [
+      
+    ]
   }
 }
 
