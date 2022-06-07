@@ -43,9 +43,6 @@ module cosmosDb 'modules/cosmosDb.bicep' = {
     location: location
     keyVaultName: keyVaultName
   }
-  dependsOn: [
-    keyVault
-  ]
 }
 
 module appServicePlan 'modules/appServicePlan.bicep' = {
@@ -88,9 +85,6 @@ module functionApp 'modules/functionApp.bicep' = {
     storageSku: storageSku
     writeContainerName: cosmosDb.outputs.writeContainerName
   }
-  dependsOn: [
-    cosmosDb
-  ]
 }
 
 module eventHubRoles 'modules/eventHubRoleAssignment.bicep'  = {
