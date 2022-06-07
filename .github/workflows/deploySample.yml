@@ -11,25 +11,9 @@ on:
     branches:
       - main
 
-jobs:
-
-  create-keyvault:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: azure/login@v1
-        name: Sign in to Azure
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - uses: Azure/cli@v1
-        name: Create Key-vault
-        with:
-          inlineScript: |
-            az keyvault create --resource-group ${{ secrets.AZURE_RG }} --name ${{ secrets.KEYVAULT_NAME }} --enabled-for-template-deployment true
-            
+jobs:            
   lint:
     runs-on: ubuntu-latest
-    needs: create-keyvault
     steps:
       - uses: actions/checkout@v2
       - name: Run Bicep Linter

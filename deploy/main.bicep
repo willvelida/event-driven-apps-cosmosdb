@@ -4,21 +4,12 @@ param location string = resourceGroup().location
 @description('Name of our application.')
 param applicationName string = uniqueString(resourceGroup().id)
 
-@description('The SKU for the storage account')
-param storageSku string = 'Standard_LRS'
-
-@description('The name of the Key Vault that we use to store secrets')
-param keyVaultName string
-
-@description('The connection string for Cosmos DB')
-@secure()
-param cosmosDbConnectionString string
-
 var appServicePlanName = '${applicationName}asp'
 var appServicePlanSkuName = 'EP1'
 var appServicePlanTierName = 'ElasticPremium'
 var workerCount = 20
 var storageAccountName = 'fnstor${replace(applicationName, '-', '')}'
+var storageSku = 'Standard_LRS'
 var functionAppName = '${applicationName}func'
 var functionRuntime = 'dotnet'
 var cosmosDbAccountName = '${applicationName}db'
@@ -31,6 +22,8 @@ var appInsightsName = '${applicationName}ai'
 var eventHubsName = '${applicationName}eh'
 var eventHubsSkuName = 'Basic'
 var hubName = 'readings'
+var keyVaultName = '${applicationName}kv'
+var keyVaultSku = 'standard'
 
 module cosmosDb 'modules/cosmosDb.bicep' = {
   name: 'cosmosDb'
@@ -44,6 +37,9 @@ module cosmosDb 'modules/cosmosDb.bicep' = {
     location: location
     keyVaultName: keyVaultName
   }
+  dependsOn: [
+    keyVault
+  ]
 }
 
 module appServicePlan 'modules/appServicePlan.bicep' = {
@@ -57,30 +53,6 @@ module appServicePlan 'modules/appServicePlan.bicep' = {
   }
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
-  name: storageAccountName
-  location: location
-  sku: {
-    name: storageSku
-  }
-  kind: 'StorageV2'
-  properties: {
-    accessTier: 'Hot'
-    supportsHttpsTrafficOnly: true
-  }
-}
-
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: appInsightsName
-  location: location
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
-  }
-}
-
 module eventHub 'modules/eventHubs.bicep' = {
   name: 'eventHub'
   params: {
@@ -91,85 +63,36 @@ module eventHub 'modules/eventHubs.bicep' = {
   }
 }
 
-resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
-  name: functionAppName
-  location: location
-  kind: 'functionapp'
-  properties: {
+module functionApp 'modules/functionApp.bicep' = {
+  name: 'functionApp'
+  params: {
+    appInsightsName: appInsightsName 
+    cosmosDbConnectionString: keyVault.getSecret('CosmosDBConnectionString')
+    cosmosDbEndpoint: cosmosDb.outputs.cosmosDbEndpoint
+    databaseName: cosmosDb.outputs.databaseName
+    eventHubName: eventHub.outputs.eventHubName
+    eventHubNamespaceName: eventHub.outputs.eventHubNamespaceName
+    functionAppName: functionAppName
+    functionRuntime: functionRuntime
+    leaseContainerName: cosmosDb.outputs.leaseContainerName
+    location: location
+    readContainerName: cosmosDb.outputs.readContainerName 
     serverFarmId: appServicePlan.outputs.appServicePlanId
-    siteConfig: {
-      appSettings: [
-        {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
-        }
-        {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
-        }
-        {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: appInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: 'InstrumentationKey=${appInsights.properties.InstrumentationKey}'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: functionRuntime
-        }
-        {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
-        }
-        {
-          name: 'DatabaseName'
-          value: cosmosDb.outputs.databaseName
-        }
-        {
-          name: 'WriteContainer'
-          value: cosmosDb.outputs.writeContainerName
-        }
-        {
-          name: 'ReadContainer'
-          value: cosmosDb.outputs.readContainerName
-        }
-        {
-          name: 'leases'
-          value: cosmosDb.outputs.leaseContainerName
-        }
-        {
-          name: 'CosmosDbConnectionString'
-          value: cosmosDbConnectionString
-        }
-        {
-          name: 'CosmosDbEndpoint'
-          value: cosmosDb.outputs.cosmosDbEndpoint
-        }
-        {
-          name: 'EventHubConnection__fullyQualifiedNamespace'
-          value: '${eventHub.outputs.eventHubNamespaceName}.servicebus.windows.net'
-        }
-        {
-          name: 'ReadingsEventHub'
-          value: eventHub.outputs.eventHubName
-        }
-      ]
-    }
-    httpsOnly: true
-  } 
-  identity: {
-    type: 'SystemAssigned'
+    storageAccountName: storageAccountName
+    storageSku: storageSku
+    writeContainerName: cosmosDb.outputs.writeContainerName
   }
+  dependsOn: [
+    cosmosDb
+  ]
 }
 
 module eventHubRoles 'modules/eventHubRoleAssignment.bicep'  = {
   name: 'eventhubsroles'
   params: {
     eventHubNamespaceName: eventHub.outputs.eventHubNamespaceName 
-    functionAppId: functionApp.id
-    functionAppPrincipalId: functionApp.identity.principalId
+    functionAppId: functionApp.outputs.functionAppId
+    functionAppPrincipalId: functionApp.outputs.functionAppPrincipalId
   }
 }
 
@@ -177,6 +100,38 @@ module sqlRoleAssignment 'modules/sqlRoleAssignment.bicep' = {
   name: 'sqlRoleAssignment'
   params: {
     cosmosDbAccountName: cosmosDb.outputs.cosmosDbAccountName
-    functionAppPrincipalId: functionApp.identity.principalId
+    functionAppPrincipalId: functionApp.outputs.functionAppPrincipalId
+  }
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: keyVaultSku
+    }
+    tenantId: subscription().tenantId
+  }
+}
+
+resource accessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-11-01-preview' = {
+  name: 'add'
+  parent: keyVault
+  properties: {
+    accessPolicies: [
+      {
+        applicationId: functionApp.outputs.functionAppId
+        objectId: functionApp.outputs.functionAppPrincipalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
+        tenantId: functionApp.outputs.functionAppTenantId
+      }
+    ]
   }
 }
