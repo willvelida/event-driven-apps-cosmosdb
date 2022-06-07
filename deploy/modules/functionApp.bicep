@@ -24,9 +24,6 @@ param writeContainerName string
 param readContainerName string
 param leaseContainerName string
 
-@secure()
-param cosmosDbConnectionString string
-
 param cosmosDbEndpoint string
 param eventHubNamespaceName string
 param eventHubName string
@@ -104,12 +101,12 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: leaseContainerName
         }
         {
-          name: 'CosmosDbConnectionString'
-          value: cosmosDbConnectionString
+          name: 'CosmosDbEndpoint__accountEndpoint'
+          value: cosmosDbEndpoint
         }
         {
-          name: 'CosmosDbEndpoint'
-          value: cosmosDbEndpoint
+          name: 'CosmosDBEndpoint__credential'
+          value: 'managedIdentity'
         }
         {
           name: 'EventHubConnection__fullyQualifiedNamespace'

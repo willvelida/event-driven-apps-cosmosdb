@@ -70,7 +70,6 @@ module functionApp 'modules/functionApp.bicep' = {
   name: 'functionApp'
   params: {
     appInsightsName: appInsightsName 
-    cosmosDbConnectionString: keyVault.getSecret('CosmosDBConnectionString')
     cosmosDbEndpoint: cosmosDb.outputs.cosmosDbEndpoint
     databaseName: cosmosDb.outputs.databaseName
     eventHubName: eventHub.outputs.eventHubName
@@ -133,6 +132,9 @@ resource accessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-11-01-pre
           secrets: [
             'get'
             'list'
+          ]
+          keys: [
+            'all'
           ]
         }
         tenantId: functionApp.outputs.functionAppTenantId
