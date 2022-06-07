@@ -24,6 +24,7 @@ var eventHubsSkuName = 'Basic'
 var hubName = 'readings'
 var keyVaultName = '${applicationName}kv'
 var keyVaultSku = 'standard'
+var gitHubActionsPrincipalId = 'eba8b646-5918-41ca-959a-6f7f3d266100'
 
 module cosmosDb 'modules/cosmosDb.bicep' = {
   name: 'cosmosDb'
@@ -101,6 +102,14 @@ module sqlRoleAssignment 'modules/sqlRoleAssignment.bicep' = {
   params: {
     cosmosDbAccountName: cosmosDb.outputs.cosmosDbAccountName
     functionAppPrincipalId: functionApp.outputs.functionAppPrincipalId
+  }
+}
+
+module keyVaultDeploymentRole 'modules/keyVaultDeploymentRole.bicep' = {
+  name: 'keyVaultDeploymentRole'
+  params: {
+    gitHubActionsPrincipalId: gitHubActionsPrincipalId
+    keyVaultName: keyVault.name
   }
 }
 
