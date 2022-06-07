@@ -158,4 +158,3 @@ output writeContainerName string = writeContainer.name
 output readContainerName string = readContainer.name
 output leaseContainerName string = leaseContainer.name
 output cosmosDbEndpoint string = cosmosDbAccount.properties.documentEndpoint
-output cosmosDbConnectionString string = cosmosDbAccount.listConnectionStrings().connectionStrings[0].connectionString
