@@ -4,6 +4,12 @@ param location string = resourceGroup().location
 @description('Name of our application.')
 param applicationName string = uniqueString(resourceGroup().id)
 
+@description('The princiaplId for GitHub Actions')
+param gitHubActionsPrincipalId string
+
+@description('The ApplicationId for the GitHub Actions workflow')
+param gitHubActionsApplicationId string
+
 var appServicePlanName = '${applicationName}asp'
 var appServicePlanSkuName = 'EP1'
 var appServicePlanTierName = 'ElasticPremium'
@@ -24,7 +30,6 @@ var eventHubsSkuName = 'Basic'
 var hubName = 'readings'
 var keyVaultName = '${applicationName}kv'
 var keyVaultSku = 'standard'
-var gitHubActionsPrincipalId = 'eba8b646-5918-41ca-959a-6f7f3d266100'
 
 module cosmosDb 'modules/cosmosDb.bicep' = {
   name: 'cosmosDb'
@@ -105,14 +110,6 @@ module sqlRoleAssignment 'modules/sqlRoleAssignment.bicep' = {
   }
 }
 
-module keyVaultDeploymentRole 'modules/keyVaultDeploymentRole.bicep' = {
-  name: 'keyVaultDeploymentRole'
-  params: {
-    gitHubActionsPrincipalId: gitHubActionsPrincipalId
-    keyVaultName: keyVault.name
-  }
-}
-
 resource keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   name: keyVaultName
   location: location
@@ -145,6 +142,17 @@ resource accessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-11-01-pre
           ]
         }
         tenantId: functionApp.outputs.functionAppTenantId
+      }
+      {
+        applicationId: gitHubActionsApplicationId
+        objectId: gitHubActionsPrincipalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
+        tenantId: subscription().tenantId
       }
     ]
   }
