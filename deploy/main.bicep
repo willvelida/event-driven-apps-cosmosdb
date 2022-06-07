@@ -150,6 +150,9 @@ resource accessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-11-01-pre
           secrets: [
             'all'
           ]
+          keys: [
+            'all'
+          ]
         }
         tenantId: subscription().tenantId
       }
