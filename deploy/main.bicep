@@ -148,8 +148,7 @@ resource accessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-11-01-pre
         objectId: gitHubActionsPrincipalId
         permissions: {
           secrets: [
-            'get'
-            'list'
+            'all'
           ]
         }
         tenantId: subscription().tenantId
