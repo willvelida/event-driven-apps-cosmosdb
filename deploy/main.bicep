@@ -4,12 +4,6 @@ param location string = resourceGroup().location
 @description('Name of our application.')
 param applicationName string = uniqueString(resourceGroup().id)
 
-@description('The princiaplId for GitHub Actions')
-param gitHubActionsPrincipalId string
-
-@description('The ApplicationId for the GitHub Actions workflow')
-param gitHubActionsApplicationId string
-
 var appServicePlanName = '${applicationName}asp'
 var appServicePlanSkuName = 'EP1'
 var appServicePlanTierName = 'ElasticPremium'
@@ -126,7 +120,6 @@ resource accessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-11-01-pre
   properties: {
     accessPolicies: [
       {
-        applicationId: functionApp.outputs.functionAppId
         objectId: functionApp.outputs.functionAppPrincipalId
         permissions: {
           secrets: [
@@ -138,19 +131,6 @@ resource accessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-11-01-pre
           ]
         }
         tenantId: functionApp.outputs.functionAppTenantId
-      }
-      {
-        applicationId: gitHubActionsApplicationId
-        objectId: gitHubActionsPrincipalId
-        permissions: {
-          secrets: [
-            'all'
-          ]
-          keys: [
-            'all'
-          ]
-        }
-        tenantId: subscription().tenantId
       }
     ]
   }
