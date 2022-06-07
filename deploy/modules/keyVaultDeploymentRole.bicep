@@ -30,7 +30,7 @@ resource roleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-prev
       }
     ]
     assignableScopes: [
-      subscription().id
+      resourceGroup().id
     ]
   }
 }
