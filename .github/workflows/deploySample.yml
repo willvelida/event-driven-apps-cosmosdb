@@ -34,6 +34,7 @@ jobs:
           deploymentName: ${{ github.run_number }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./deploy/main.bicep
+          parameters: gitHubActionsPrincipalId=${{ secrets.OBJECT_ID }} gitHubActionsApplicationId=${{ secrets.APP_ID }}
           deploymentMode: Validate
   
   preview:
