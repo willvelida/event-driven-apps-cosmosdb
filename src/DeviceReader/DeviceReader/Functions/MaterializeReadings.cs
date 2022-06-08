@@ -1,13 +1,11 @@
+using DeviceReader.Models;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DeviceReader.Models;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace DeviceReader.Functions
 {
@@ -28,7 +26,12 @@ namespace DeviceReader.Functions
 
         [FunctionName(nameof(MaterializeReadings))]
         public async Task Run([CosmosDBTrigger(
-            "ReadingsDb", "Readings", Connection = "CosmosDbConnection", LeaseContainerName = "leases")]IReadOnlyList<DeviceReading> input)
+            "ReadingsDb",
+            "Readings",
+            Connection = "CosmosDbConnection",
+            LeaseContainerName = "leases",
+            LeaseContainerPrefix = "Locations"
+            )]IReadOnlyList<DeviceReading> input)
         {
             try
             {
@@ -41,12 +44,11 @@ namespace DeviceReader.Functions
                     }
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError($"Exception thrown in {nameof(MaterializeReadings)}: {ex.Message}");
                 throw;
             }
-            
         }
     }
 }

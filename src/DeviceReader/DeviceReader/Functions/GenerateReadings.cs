@@ -32,7 +32,7 @@ namespace DeviceReader.Functions
                 .RuleFor(i => i.DeviceId, (fake) => Guid.NewGuid().ToString())
                 .RuleFor(i => i.DeviceTemperature, (fake) => Math.Round(fake.Random.Decimal(0.00m, 30.00m), 2))
                 .RuleFor(i => i.DamageLevel, (fake) => fake.PickRandom(new List<string> { "Low", "Medium", "High" }))
-                .RuleFor(i => i.Location, (fake) => fake.PickRandom(new List<string> { "Auckland", "Redmond", "London", "Dubai", "Paris"}))
+                .RuleFor(i => i.Location, (fake) => fake.PickRandom(new List<string> { "Auckland", "Redmond", "London", "Dubai", "Paris" }))
                 .RuleFor(i => i.DeviceAgeInDays, (fake) => fake.Random.Number(1, 60))
                 .GenerateLazy(numberOfEvents);
 
