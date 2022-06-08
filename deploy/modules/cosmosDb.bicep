@@ -22,10 +22,19 @@ param containerThroughput int
 @description('The name of the key vault to store secrets in')
 param keyVaultName string
 
+@description('The name of the Log Analytics workspace to send logs to.')
+param logAnalyticsWorkspace string
+
 var connectionStringSecretName = 'CosmosDbConnectionString'
+var leaseContainerThroughput = 400
+var secondaryRegion = 'Australia Southeast'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2021-11-01-preview' existing = {
   name: keyVaultName
+}
+
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
+  name: logAnalyticsWorkspace
 }
 
 resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-11-15-preview' = {
@@ -33,19 +42,64 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-11-15-previ
   location: location
   properties: {
     databaseAccountOfferType: 'Standard'
+    enableAnalyticalStorage: true
     locations: [
       {
         locationName: location
         failoverPriority: 0
         isZoneRedundant: true
       }
+      {
+        locationName: secondaryRegion
+        failoverPriority: 1
+        isZoneRedundant: false
+      }
     ]
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
     }
+    backupPolicy: {
+      type: 'Continuous'
+    }
   }
   identity: {
     type: 'SystemAssigned'
+  }
+}
+
+resource diagnosticMetric 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: '${cosmosDbAccountName}-diagnostics'
+  scope: cosmosDbAccount
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [
+      {
+        category: 'DataPlaneRequests'
+        enabled: true
+      }
+      {
+        category: 'QueryRuntimeStatistics'
+        enabled: true
+      }
+      {
+        category: 'PartitionKeyStatistics'
+        enabled: true
+      }
+      {
+        category: 'PartitionKeyRUConsumption'
+        enabled: true
+      }
+      {
+        category: 'ControlPlaneRequests'
+        enabled: true
+      }
+    ]
+    metrics: [
+      {
+        category: 'Requests'
+        enabled: true
+      }
+    ]
   }
 }
 
@@ -76,6 +130,7 @@ resource writeContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/cont
         ]
         kind: 'Hash'
       }
+      defaultTtl: 600
       indexingPolicy: {
         indexingMode: 'consistent'
         includedPaths: [
@@ -122,7 +177,7 @@ resource leaseContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/cont
   parent: database
   properties: {
     options: {
-      throughput: containerThroughput
+      throughput: leaseContainerThroughput
     }
     resource: {
       id: leaseContainerName

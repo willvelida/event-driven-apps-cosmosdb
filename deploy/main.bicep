@@ -24,6 +24,15 @@ var eventHubsSkuName = 'Basic'
 var hubName = 'readings'
 var keyVaultName = '${applicationName}kv'
 var keyVaultSku = 'standard'
+var logAnalyticsWorkspaceName = '${applicationName}law'
+
+module logAnalytics 'modules/logAnalytics.bicep' = {
+  name: 'logAnalytics'
+  params: {
+    location: location
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+  }
+}
 
 module cosmosDb 'modules/cosmosDb.bicep' = {
   name: 'cosmosDb'
@@ -36,6 +45,7 @@ module cosmosDb 'modules/cosmosDb.bicep' = {
     databaseName: databaseName
     location: location
     keyVaultName: keyVaultName
+    logAnalyticsWorkspace: logAnalyticsWorkspaceName
   }
 }
 
