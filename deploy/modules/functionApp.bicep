@@ -30,7 +30,7 @@ param cosmosDbId string
 param eventHubNamespaceName string
 param eventHubName string
 
-var roleDefinitionId = '00000000-0000-0000-0000-000000000002'
+var comsosDbContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '00000000-0000-0000-0000-000000000002') 
 
 resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2022-02-15-preview' existing = {
   name: cosmosDbAccountName
@@ -134,11 +134,12 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
 }
 
 resource cosmosDataReaderRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid(functionApp.id, cosmosDbId, roleDefinitionId)
+  name: guid(functionApp.id, cosmosDbId, comsosDbContributorRoleId)
   scope: cosmosDb
   properties: {
     principalId: functionApp.identity.principalId
-    roleDefinitionId: roleDefinitionId
+    roleDefinitionId: comsosDbContributorRoleId
+    principalType: 'ServicePrincipal'
   }
 }
 
