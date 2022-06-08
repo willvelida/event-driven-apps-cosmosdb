@@ -13,6 +13,7 @@ var dataActions = [
 ]
 
 var comsosDbContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '00000000-0000-0000-0000-000000000002') 
+var contributorAssignmentId = guid(comsosDbContributorRoleId, functionAppPrincipalId, cosmosDbAccount.id)
 
 resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-11-15-preview' existing = {
   name: cosmosDbAccountName
@@ -47,7 +48,7 @@ resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignm
 }
 
 resource cosmosDataReaderRole 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-11-15-preview' = {
-  name: '${cosmosDbAccountName}/${guid(functionAppPrincipalId, cosmosDbAccount.id, comsosDbContributorRoleId)}'
+  name: '${cosmosDbAccountName}/${contributorAssignmentId}'
   properties: {
     principalId: functionAppPrincipalId
     roleDefinitionId: comsosDbContributorRoleId
