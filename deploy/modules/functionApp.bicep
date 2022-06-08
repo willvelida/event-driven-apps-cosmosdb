@@ -101,6 +101,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: leaseContainerName
         }
         {
+          name: 'CosmosDbEndpoint'
+          value: cosmosDbEndpoint
+        }
+        {
           name: 'CosmosDbEndpoint__accountEndpoint'
           value: cosmosDbEndpoint
         }
