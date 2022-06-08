@@ -153,6 +153,7 @@ resource connectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-pr
 }
 
 output cosmosDbAccountName string = cosmosDbAccount.name
+output cosmosDbId string = cosmosDbAccount.id
 output databaseName string = database.name
 output writeContainerName string = writeContainer.name
 output readContainerName string = readContainer.name

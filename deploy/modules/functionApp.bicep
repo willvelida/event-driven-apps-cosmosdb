@@ -25,8 +25,11 @@ param readContainerName string
 param leaseContainerName string
 
 param cosmosDbEndpoint string
+param cosmosDbId string
 param eventHubNamespaceName string
 param eventHubName string
+
+var roleDefinitionId = '00000000-0000-0000-0000-000000000002'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   name: storageAccountName
@@ -122,6 +125,15 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   } 
   identity: {
     type: 'SystemAssigned'
+  }
+}
+
+resource cosmosDataReaderRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+  name: guid(functionApp.id, cosmosDbId, roleDefinitionId)
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: roleDefinitionId
+    scope: cosmosDbId
   }
 }
 
