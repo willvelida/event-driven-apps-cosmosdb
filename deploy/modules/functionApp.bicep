@@ -105,11 +105,11 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: cosmosDbEndpoint
         }
         {
-          name: 'CosmosDbEndpoint__accountEndpoint'
+          name: 'CosmosDbConnection__accountEndpoint'
           value: cosmosDbEndpoint
         }
         {
-          name: 'CosmosDBEndpoint__credential'
+          name: 'CosmosDbConnection__credential'
           value: 'managedIdentity'
         }
         {
