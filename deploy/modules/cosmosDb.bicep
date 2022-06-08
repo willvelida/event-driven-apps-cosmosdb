@@ -49,11 +49,6 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-11-15-previ
         failoverPriority: 0
         isZoneRedundant: true
       }
-      {
-        locationName: secondaryRegion
-        failoverPriority: 1
-        isZoneRedundant: false
-      }
     ]
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
