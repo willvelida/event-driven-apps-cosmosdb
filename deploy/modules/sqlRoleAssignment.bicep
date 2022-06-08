@@ -47,7 +47,7 @@ resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignm
 }
 
 resource cosmosDataReaderRole 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-11-15-preview' = {
-  name: '${cosmosDbAccountName}/guid(functionAppPrincipalId, cosmosDbAccount.id, comsosDbContributorRoleId)'
+  name: '${cosmosDbAccountName}/${guid(functionAppPrincipalId, cosmosDbAccount.id, comsosDbContributorRoleId)}'
   properties: {
     principalId: functionAppPrincipalId
     roleDefinitionId: comsosDbContributorRoleId
