@@ -53,9 +53,6 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2021-11-15-previ
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
     }
-    backupPolicy: {
-      type: 'Continuous'
-    }
   }
   identity: {
     type: 'SystemAssigned'
