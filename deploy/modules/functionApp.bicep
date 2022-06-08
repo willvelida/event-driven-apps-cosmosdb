@@ -19,6 +19,7 @@ param storageSku string
 @description('The name of the Application Insights Instance that this Function will use.')
 param appInsightsName string
 
+param cosmosDbAccountName string
 param databaseName string
 param writeContainerName string
 param readContainerName string
@@ -30,6 +31,10 @@ param eventHubNamespaceName string
 param eventHubName string
 
 var roleDefinitionId = '00000000-0000-0000-0000-000000000002'
+
+resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2022-02-15-preview' existing = {
+  name: cosmosDbAccountName
+}
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   name: storageAccountName
@@ -130,10 +135,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
 
 resource cosmosDataReaderRole 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
   name: guid(functionApp.id, cosmosDbId, roleDefinitionId)
+  scope: cosmosDb
   properties: {
     principalId: functionApp.identity.principalId
     roleDefinitionId: roleDefinitionId
-    scope: cosmosDbId
   }
 }
 

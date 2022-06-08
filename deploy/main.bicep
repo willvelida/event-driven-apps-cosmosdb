@@ -78,6 +78,7 @@ module functionApp 'modules/functionApp.bicep' = {
     storageSku: storageSku
     writeContainerName: cosmosDb.outputs.writeContainerName
     cosmosDbId: cosmosDb.outputs.cosmosDbId
+    cosmosDbAccountName: cosmosDb.outputs.cosmosDbAccountName
   }
 }
 
