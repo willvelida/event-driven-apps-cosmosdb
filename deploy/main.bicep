@@ -25,6 +25,7 @@ var hubName = 'readings'
 var keyVaultName = '${applicationName}kv'
 var keyVaultSku = 'standard'
 var logAnalyticsWorkspaceName = '${applicationName}law'
+var loadTestingName = '${applicationName}load'
 
 module logAnalytics 'modules/logAnalytics.bicep' = {
   name: 'logAnalytics'
@@ -144,4 +145,12 @@ resource accessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2021-11-01-pre
       }
     ]
   }
+}
+
+resource loadTesting 'Microsoft.LoadTestService/loadTests@2022-04-15-preview' = {
+  name: loadTestingName
+  location: location
+  identity: {
+    type: 'SystemAssigned'
+  } 
 }
